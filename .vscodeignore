@@ -1,0 +1,14 @@
+# Source and build config (we ship compiled out/*.js only)
+src/**
+**/*.ts
+**/*.map
+tsconfig.json
+
+# Repo tooling
+.github/**
+.gitignore
+.vscodeignore
+.DS_Store
+
+# Don't bundle a previously packaged extension
+*.vsix

@@ -1,0 +1,119 @@
+{
+  "name": "koja",
+  "displayName": "Koja Language",
+  "description": "Syntax highlighting and language server support for the Koja programming language",
+  "version": "0.1.0",
+  "publisher": "koja-lang",
+  "license": "MIT",
+  "icon": "logo.png",
+  "homepage": "https://kojalang.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koja-lang/vscode-koja.git"
+  },
+  "bugs": {
+    "url": "https://github.com/koja-lang/vscode-koja/issues"
+  },
+  "keywords": [
+    "koja",
+    "language",
+    "lsp"
+  ],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:koja"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "koja",
+        "aliases": [
+          "Koja",
+          "koja"
+        ],
+        "extensions": [
+          ".koja",
+          ".kojs"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/koja-light.svg",
+          "dark": "./icons/koja-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "koja",
+        "scopeName": "source.koja",
+        "path": "./syntaxes/koja.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.koja.codeblock",
+        "path": "./syntaxes/koja.markdown.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.koja": "koja"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "koja.restartServer",
+        "title": "Koja: Restart Language Server"
+      },
+      {
+        "command": "koja.runFile",
+        "title": "Koja: Run File"
+      },
+      {
+        "command": "koja.buildFile",
+        "title": "Koja: Build File"
+      }
+    ],
+    "configurationDefaults": {
+      "[koja]": {
+        "editor.formatOnSave": true
+      }
+    },
+    "configuration": {
+      "title": "Koja",
+      "properties": {
+        "koja.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the koja CLI binary. If empty, searches $PATH."
+        },
+        "koja.lsp.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the koja-lsp binary. If empty, searches $PATH."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "package": "npx --yes @vscode/vsce package",
+    "publish:vsce": "npx --yes @vscode/vsce publish",
+    "publish:ovsx": "npx --yes ovsx publish"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
+  }
+}
