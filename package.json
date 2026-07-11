@@ -2,7 +2,7 @@
   "name": "koja",
   "displayName": "Koja Language",
   "description": "Syntax highlighting and language server support for the Koja programming language",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "koja-lang",
   "license": "MIT",
   "icon": "logo.png",
@@ -81,6 +81,7 @@
     ],
     "configurationDefaults": {
       "[koja]": {
+        "editor.defaultFormatter": "koja-lang.koja",
         "editor.formatOnSave": true
       }
     },

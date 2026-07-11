@@ -56,7 +56,7 @@ Then open the command palette and run **Extensions: Install from VSIX…**, sele
 
 Repository layout:
 
-- `src/extension.ts` — extension entry point; launches the `koja-lsp` client and registers the run/build/restart commands.
+- `src/extension.ts` — entry point that launches the `koja-lsp` client and registers the run/build/restart commands.
 - `syntaxes/` — TextMate grammars (`koja.tmLanguage.json` plus a Markdown code-block injection).
 - `language-configuration.json` — brackets, comments, auto-indent, and folding rules.
 

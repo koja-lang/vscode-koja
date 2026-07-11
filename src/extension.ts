@@ -1,24 +1,10 @@
-import {
-  commands,
-  languages,
-  window,
-  workspace,
-  ExtensionContext,
-  TextDocument,
-  TextEdit,
-  Range,
-  Position,
-  FormattingOptions,
-  CancellationToken,
-} from "vscode";
+import { commands, window, workspace, ExtensionContext } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node";
-import { execFileSync } from "child_process";
-import { existsSync, writeFileSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
+import { existsSync } from "fs";
 import { dirname, join } from "path";
 
 let client: LanguageClient | undefined;
@@ -132,45 +118,6 @@ export function activate(context: ExtensionContext) {
 
     commands.registerCommand("koja.buildFile", () => {
       runKojaCommand("build");
-    }),
-
-    languages.registerDocumentFormattingEditProvider("koja", {
-      provideDocumentFormattingEdits(
-        document: TextDocument,
-        _options: FormattingOptions,
-        _token: CancellationToken,
-      ): TextEdit[] {
-        const binary = getKojaBinary();
-        const text = document.getText();
-        const tmpFile = join(tmpdir(), `koja-fmt-${Date.now()}.koja`);
-
-        try {
-          writeFileSync(tmpFile, text, "utf-8");
-          const formatted = execFileSync(binary, ["format", tmpFile], {
-            encoding: "utf-8",
-            timeout: 10_000,
-          });
-
-          if (formatted === text) {
-            return [];
-          }
-
-          const lastLine = document.lineCount - 1;
-          const fullRange = new Range(
-            new Position(0, 0),
-            new Position(lastLine, document.lineAt(lastLine).text.length),
-          );
-          return [TextEdit.replace(fullRange, formatted)];
-        } catch {
-          return [];
-        } finally {
-          try {
-            unlinkSync(tmpFile);
-          } catch {
-            // cleanup is best-effort
-          }
-        }
-      },
     }),
   );
 }
