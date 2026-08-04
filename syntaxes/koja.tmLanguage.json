@@ -108,6 +108,11 @@
           "match": "\\b(if|else|unless|match|cond|when|return|break)\\b"
         },
         {
+          "comment": "Error channel keywords. The `(?!\\?)` guard keeps `?`-suffixed identifiers like `fail?` classified as identifiers, since the compiler's keyword check is on the whole token.",
+          "name": "keyword.control.error.koja",
+          "match": "\\b(try|fail|rescue)\\b(?!\\?)"
+        },
+        {
           "name": "keyword.control.loop.koja",
           "match": "\\b(for|loop|while|in)\\b"
         },
@@ -174,6 +179,11 @@
         {
           "name": "keyword.operator.comparison.koja",
           "match": "[!=]=|[<>]=?"
+        },
+        {
+          "comment": "The error channel separator in `-> T ! E` signatures. Listed after comparison so `!=` wins first.",
+          "name": "keyword.operator.error-channel.koja",
+          "match": "!"
         },
         {
           "name": "keyword.operator.assignment.compound.koja",
