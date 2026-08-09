@@ -134,7 +134,7 @@
         },
         {
           "name": "storage.type.koja",
-          "match": "\\b(struct|enum|protocol)\\b"
+          "match": "\\b(struct|enum|protocol|builtin)\\b"
         },
         {
           "name": "keyword.operator.logical.koja",
