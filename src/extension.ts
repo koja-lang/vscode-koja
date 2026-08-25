@@ -71,7 +71,7 @@ function runKojaCommand(subcommand: string) {
 
     const projectDir = findProjectRoot(filePath);
     if (projectDir) {
-      terminal.sendText(`cd "${projectDir}" && ${binary} ${subcommand}`);
+      terminal.sendText(`${binary} ${subcommand} -S "${projectDir}"`);
     } else {
       window.showErrorMessage(
         "No koja.toml found. `.koja` files run as part of a project; use a `.kojs` script for standalone files.",
