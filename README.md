@@ -47,6 +47,8 @@ and run **Extensions: Install from VSIX…** from the command palette, selecting
 | `Koja: Build File`              | Build the current `.kojs` or project. |
 | `Koja: Restart Language Server` | Restart `koja-lsp`.                   |
 
+For a `.koja` file, the extension selects the nearest `koja.toml` with `koja -S`. The shared terminal keeps its working directory. A `.kojs` script still runs by its file path.
+
 ## Settings
 
 | Setting         | Description                                            |
