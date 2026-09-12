@@ -106,7 +106,7 @@
       "patterns": [
         {
           "name": "keyword.control.flow.koja",
-          "match": "\\b(if|else|unless|match|cond|when|return|break)\\b"
+          "match": "\\b(if|else|match|cond|when|return|break)\\b"
         },
         {
           "comment": "Error channel keywords. The `(?!\\?)` guard keeps `?`-suffixed identifiers like `fail?` classified as identifiers, since the compiler's keyword check is on the whole token.",

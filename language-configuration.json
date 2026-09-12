@@ -20,7 +20,7 @@
     { "open": "\"", "close": "\"" }
   ],
   "indentationRules": {
-    "increaseIndentPattern": "^\\s*(priv\\s+)?(fn|if|else|for|loop|while|match|cond|receive|struct|enum|builtin|protocol|impl|extend|unless|when|do)\\b",
+    "increaseIndentPattern": "^\\s*(priv\\s+)?(fn|if|else|for|loop|while|match|cond|receive|struct|enum|builtin|protocol|impl|extend|when|do)\\b",
     "decreaseIndentPattern": "^\\s*(end|else)\\b"
   },
   "folding": {
