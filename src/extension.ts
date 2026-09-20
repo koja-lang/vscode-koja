@@ -4,15 +4,10 @@ import {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node";
-import { existsSync } from "fs";
-import { dirname, join } from "path";
+import { findProjectRoot, findWorkspaceProjects, kojaBinary } from "./project";
+import { KojaTests } from "./tests";
 
 let client: LanguageClient | undefined;
-
-function getKojaBinary(): string {
-  const config = workspace.getConfiguration("koja");
-  return config.get<string>("path", "") || "koja";
-}
 
 function createClient(): LanguageClient {
   const config = workspace.getConfiguration("koja.lsp");
@@ -36,6 +31,14 @@ function createClient(): LanguageClient {
   );
 }
 
+function kojaTerminal() {
+  const terminal =
+    window.terminals.find((t) => t.name === "Koja") ||
+    window.createTerminal("Koja");
+  terminal.show();
+  return terminal;
+}
+
 function runKojaCommand(subcommand: string) {
   const editor = window.activeTextEditor;
   if (!editor) {
@@ -45,7 +48,7 @@ function runKojaCommand(subcommand: string) {
 
   const doc = editor.document;
   if (doc.languageId !== "koja") {
-    window.showErrorMessage("Active file is not an Koja file.");
+    window.showErrorMessage("Active file is not a Koja file.");
     return;
   }
 
@@ -55,12 +58,9 @@ function runKojaCommand(subcommand: string) {
   }
 
   doc.save().then(() => {
-    const binary = getKojaBinary();
+    const binary = kojaBinary();
     const filePath = doc.uri.fsPath;
-    const terminal =
-      window.terminals.find((t) => t.name === "Koja") ||
-      window.createTerminal("Koja");
-    terminal.show();
+    const terminal = kojaTerminal();
 
     // `.kojs` scripts run directly. `.koja` files are compilation units
     // of a project, so run the project (nearest `koja.toml`) instead.
@@ -80,23 +80,41 @@ function runKojaCommand(subcommand: string) {
   });
 }
 
-function findProjectRoot(filePath: string): string | undefined {
-  let dir = dirname(filePath);
-  for (;;) {
-    if (existsSync(join(dir, "koja.toml"))) {
-      return dir;
+/**
+ * `koja test` for the project of the active file, or for the only
+ * project in the workspace when no file points at one.
+ */
+async function testProject() {
+  const active = window.activeTextEditor?.document;
+  let projectDir =
+    active && !active.isUntitled
+      ? findProjectRoot(active.uri.fsPath)
+      : undefined;
+
+  if (!projectDir) {
+    const projects = await findWorkspaceProjects();
+    if (projects.length === 1) {
+      projectDir = projects[0];
+    } else if (projects.length === 0) {
+      window.showErrorMessage("No koja.toml found in the workspace.");
+      return;
+    } else {
+      window.showErrorMessage(
+        "Open a file inside the project to test, or run tests from the Testing view.",
+      );
+      return;
     }
-    const parent = dirname(dir);
-    if (parent === dir) {
-      return undefined;
-    }
-    dir = parent;
   }
+
+  await workspace.saveAll();
+  kojaTerminal().sendText(`${kojaBinary()} test -S "${projectDir}"`);
 }
 
 export function activate(context: ExtensionContext) {
   client = createClient();
   client.start();
+
+  new KojaTests(context);
 
   context.subscriptions.push(
     commands.registerCommand("koja.restartServer", async () => {
@@ -119,6 +137,8 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand("koja.buildFile", () => {
       runKojaCommand("build");
     }),
+
+    commands.registerCommand("koja.testProject", () => testProject()),
   );
 }
 

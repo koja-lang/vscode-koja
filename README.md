@@ -35,19 +35,23 @@ and run **Extensions: Install from VSIX…** from the command palette, selecting
 ## Features
 
 - Syntax highlighting for `.koja` and `.kojs` files, and Koja code blocks in Markdown.
-- Language-server features via [`koja-lsp`](https://github.com/koja-lang/koja/tree/main/crates/koja-lsp): diagnostics, hover, completion, go-to-definition, and document symbols.
+- Language-server features via [`koja-lsp`](https://github.com/koja-lang/koja/tree/main/crates/koja-lsp): diagnostics, hover, completion, signature help, go-to-definition, find references, rename, document highlight, inlay hints, document and workspace symbols, and folding.
 - Format on save through `koja format`.
-- Commands to run and build the current file.
+- A Testing view. Every `test "..."` block in a project's `src/` and `test/` appears in the tree, and a run executes `koja test` for the project and shows each result inline. A failed `assert` shows the expression, the message, and a diff of both sides at the assertion line.
+- Commands to run and build the current file, and to test the current project.
 
 ## Commands
 
-| Command                         | Description                           |
-| ------------------------------- | ------------------------------------- |
-| `Koja: Run File`                | Run the current `.kojs` or project.   |
-| `Koja: Build File`              | Build the current `.kojs` or project. |
-| `Koja: Restart Language Server` | Restart `koja-lsp`.                   |
+| Command                         | Description                              |
+| ------------------------------- | ---------------------------------------- |
+| `Koja: Run File`                | Run the current `.kojs` or project.      |
+| `Koja: Build File`              | Build the current `.kojs` or project.    |
+| `Koja: Test Project`            | Run `koja test` for the current project. |
+| `Koja: Restart Language Server` | Restart `koja-lsp`.                      |
 
 For a `.koja` file, the extension selects the nearest `koja.toml` with `koja -S`. The shared terminal keeps its working directory. A `.kojs` script still runs by its file path.
+
+`koja test` has no per-test filter, so running one test from the Testing view runs its whole project and reports every result.
 
 ## Settings
 
@@ -60,7 +64,9 @@ For a `.koja` file, the extension selects the nearest `koja.toml` with `koja -S`
 
 Repository layout:
 
-- `src/extension.ts`: entry point that launches the `koja-lsp` client and registers the run/build/restart commands.
+- `src/extension.ts`: entry point that launches the `koja-lsp` client and registers the run, build, test, and restart commands.
+- `src/tests.ts`: the Testing view. Finds `test` blocks and maps `koja test --reporter json` events to results.
+- `src/project.ts`: locates `koja.toml` projects and their sources.
 - `syntaxes/`: TextMate grammars (`koja.tmLanguage.json` plus a Markdown code-block injection).
 - `language-configuration.json`: brackets, comments, auto-indent, and folding rules.
 

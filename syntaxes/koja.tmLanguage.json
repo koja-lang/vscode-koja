@@ -7,6 +7,8 @@
     { "include": "#strings" },
     { "include": "#numbers" },
     { "include": "#annotations" },
+    { "include": "#test-definition" },
+    { "include": "#alias-member" },
     { "include": "#function-reference" },
     { "include": "#function-definition" },
     { "include": "#function-call" },
@@ -112,6 +114,11 @@
           "comment": "Error channel keywords. The `(?!\\?)` guard keeps `?`-suffixed identifiers like `fail?` classified as identifiers, since the compiler's keyword check is on the whole token.",
           "name": "keyword.control.error.koja",
           "match": "\\b(try|fail|rescue)\\b(?!\\?)"
+        },
+        {
+          "comment": "`assert cond` and `assert cond, \"message\"` fail the enclosing test. The same `(?!\\?)` guard keeps `assert?` an identifier.",
+          "name": "keyword.control.assert.koja",
+          "match": "\\bassert\\b(?!\\?)"
         },
         {
           "name": "keyword.control.loop.koja",
@@ -239,6 +246,30 @@
           "match": "\\b([A-Z][a-zA-Z0-9]*)(?=\\.[A-Z])",
           "captures": {
             "1": { "name": "entity.name.namespace.koja" }
+          }
+        }
+      ]
+    },
+    "test-definition": {
+      "patterns": [
+        {
+          "comment": "`test \"description\"` opens a block that ends with `end`. The description highlights as a string through the normal rule.",
+          "match": "\\b(test)\\b(?=\\s+\")",
+          "captures": {
+            "1": { "name": "keyword.other.test.koja" }
+          }
+        }
+      ]
+    },
+    "alias-member": {
+      "patterns": [
+        {
+          "comment": "`alias Pkg.func` and `alias Pkg.CONST` bind a package-level function or constant. The head is a package, not a type, and the member is the bound name.",
+          "match": "\\b(alias)\\s+([A-Z][a-zA-Z0-9]*)\\.([a-z_][a-z0-9_]*\\??|[A-Z][A-Z0-9_]+)(?![A-Za-z0-9_?])",
+          "captures": {
+            "1": { "name": "keyword.other.koja" },
+            "2": { "name": "entity.name.namespace.koja" },
+            "3": { "name": "entity.name.function.koja" }
           }
         }
       ]
