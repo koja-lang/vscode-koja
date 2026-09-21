@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Supports Koja 0.19.
+
+### Added
+
+- Syntax highlighting, auto-indent, and folding for `test "description"` blocks, and highlighting for the `assert` statement.
+- Syntax highlighting for function and constant aliases (`alias JSON.decode`). The package head is a namespace, not a type.
+- A Testing view. `test` blocks under a project's `src/` and `test/` appear in the tree, a run executes `koja test --reporter json` for the project, and each result shows inline. A failed `assert` shows a diff of both sides at the assertion line.
+- `Koja: Test Project` command, which runs `koja test` for the current project in the shared terminal.
+- The extension activates when the workspace contains a `koja.toml`, so tests appear before a `.koja` file is opened.
+
+### Changed
+
+- README lists the language-server features that `koja-lsp` 0.19 answers, which now include signature help, find references, rename, document highlight, inlay hints, workspace symbols, and folding.
+
 ### Removed
 
 - Syntax highlighting and auto-indent for `unless`, removed from the language in Koja 0.19. Write `if not cond` instead.
@@ -48,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release.
 
-[unreleased]: https://github.com/koja-lang/vscode-koja/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/koja-lang/vscode-koja/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/koja-lang/vscode-koja/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/koja-lang/vscode-koja/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/koja-lang/vscode-koja/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/koja-lang/vscode-koja/compare/v0.1.0...v0.1.1

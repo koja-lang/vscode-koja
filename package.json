@@ -2,7 +2,7 @@
   "name": "koja",
   "displayName": "Koja Language",
   "description": "Syntax highlighting and language server support for the Koja programming language",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "koja-lang",
   "license": "MIT",
   "icon": "logo.png",
@@ -27,7 +27,8 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onLanguage:koja"
+    "onLanguage:koja",
+    "workspaceContains:**/koja.toml"
   ],
   "contributes": {
     "languages": [
@@ -77,6 +78,10 @@
       {
         "command": "koja.buildFile",
         "title": "Koja: Build File"
+      },
+      {
+        "command": "koja.testProject",
+        "title": "Koja: Test Project"
       }
     ],
     "configurationDefaults": {
