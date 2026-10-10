@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-10
+
+Supports features for Koja 0.20.
+
+### Added
+
+- A `Run test` code lens above each `test` block, from `koja-lsp` 0.20. The lens runs the `koja.runTest` command, which saves the file and runs that one test through the Testing view.
+- Running one or more tests from the Testing view passes `--only <file>:<line>` for each one instead of running the whole project and filtering the results.
+- Quick fixes. A diagnostic that carries a compiler fix offers it in the lightbulb menu.
+
 ## [0.5.0] - 2026-09-21
 
 Supports features for Koja 0.19.

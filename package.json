@@ -2,7 +2,7 @@
   "name": "koja",
   "displayName": "Koja Language",
   "description": "Syntax highlighting and language server support for the Koja programming language",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "koja-lang",
   "license": "MIT",
   "icon": "logo.png",
@@ -82,8 +82,20 @@
       {
         "command": "koja.testProject",
         "title": "Koja: Test Project"
+      },
+      {
+        "command": "koja.runTest",
+        "title": "Koja: Run Test"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "koja.runTest",
+          "when": "false"
+        }
+      ]
+    },
     "configurationDefaults": {
       "[koja]": {
         "editor.defaultFormatter": "koja-lang.koja",

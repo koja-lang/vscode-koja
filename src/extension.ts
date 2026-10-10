@@ -1,4 +1,5 @@
-import { commands, window, workspace, ExtensionContext } from "vscode";
+import { join } from "path";
+import { commands, window, workspace, ExtensionContext, Uri } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -110,11 +111,29 @@ async function testProject() {
   kojaTerminal().sendText(`${kojaBinary()} test -S "${projectDir}"`);
 }
 
+/**
+ * The run-test code lens from `koja-lsp`. `id` is the `file:line` spec
+ * id relative to `root`. `koja test` reads the file from disk, so a
+ * dirty buffer is saved first or the line would point at the wrong
+ * test.
+ */
+async function runTest(tests: KojaTests, root: string, id: string) {
+  const path = id.slice(0, id.lastIndexOf(":"));
+  const uri = Uri.file(join(root, path));
+  const document = workspace.textDocuments.find(
+    (d) => d.uri.toString() === uri.toString(),
+  );
+  if (document?.isDirty) {
+    await document.save();
+  }
+  tests.runTest(root, id);
+}
+
 export function activate(context: ExtensionContext) {
   client = createClient();
   client.start();
 
-  new KojaTests(context);
+  const tests = new KojaTests(context);
 
   context.subscriptions.push(
     commands.registerCommand("koja.restartServer", async () => {
@@ -139,6 +158,10 @@ export function activate(context: ExtensionContext) {
     }),
 
     commands.registerCommand("koja.testProject", () => testProject()),
+
+    commands.registerCommand("koja.runTest", (root: string, id: string) =>
+      runTest(tests, root, id),
+    ),
   );
 }
 
