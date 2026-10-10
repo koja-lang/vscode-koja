@@ -2,6 +2,7 @@ import { ChildProcess, spawn } from "child_process";
 import { basename, join, relative, sep } from "path";
 import {
   CancellationToken,
+  CancellationTokenSource,
   ExtensionContext,
   Location,
   Position,
@@ -68,9 +69,10 @@ interface Failure {
  *
  * The tree is project, then file, then test. Tests are found by scanning
  * source text for `test "..."` lines, so the tree does not depend on the
- * language server. A run executes `koja test --reporter json` for the
- * whole project, since the CLI has no per-test filter yet, and maps each
- * `file:line` spec id back to its item.
+ * language server. A run executes `koja test --reporter json` for each
+ * project that owns a selected item, with `--only file:line` for every
+ * selected test when the selection is narrower than the project, and
+ * maps each spec id in the output back to its item.
  */
 export class KojaTests {
   private readonly controller: TestController;
@@ -289,18 +291,33 @@ export class KojaTests {
 
   // Running.
 
+  /**
+   * Runs the test at `id` (a `file:line` spec id) in the project at
+   * `root`. The code lens command lands here. The item is created when
+   * the tree has not caught up with the source yet.
+   */
+  runTest(root: string, id: string): void {
+    const project = this.projectItem(root);
+    const item = this.itemFor(project, id, id);
+    if (!item) {
+      return;
+    }
+    const request = new TestRunRequest([item]);
+    void this.run(request, new CancellationTokenSource().token);
+  }
+
   private async run(
     request: TestRunRequest,
     token: CancellationToken,
   ): Promise<void> {
-    const projects = this.projectsToRun(request);
+    const selections = this.selectionsToRun(request);
     const run = this.controller.createTestRun(request);
     try {
-      for (const project of projects) {
+      for (const selection of selections) {
         if (token.isCancellationRequested) {
           break;
         }
-        await this.runProject(project, run, token);
+        await this.runProject(selection, run, token);
       }
     } finally {
       run.end();
@@ -308,47 +325,63 @@ export class KojaTests {
   }
 
   /**
-   * The CLI runs a whole project, so any selection widens to the
-   * projects that own the selected items.
+   * One selection per project that owns a selected item. `tests` is
+   * every selected leaf, or empty when the whole project runs.
    */
-  private projectsToRun(request: TestRunRequest): TestItem[] {
-    if (!request.include) {
+  private selectionsToRun(request: TestRunRequest): Selection[] {
+    let include = request.include;
+    if (!include) {
       const all: TestItem[] = [];
       this.controller.items.forEach((item) => all.push(item));
-      return all;
+      include = all;
     }
-    const roots = new Map<string, TestItem>();
-    for (const item of request.include) {
-      let top = item;
-      while (top.parent) {
-        top = top.parent;
+
+    const selections = new Map<string, Selection>();
+    const wholeProjects = new Set<string>();
+    for (const item of include) {
+      const project = projectOf(item);
+      let selection = selections.get(project.id);
+      if (!selection) {
+        selection = { project, tests: [] };
+        selections.set(project.id, selection);
       }
-      roots.set(top.id, top);
+      if (item === project) {
+        wholeProjects.add(project.id);
+        selection.tests = [];
+      } else if (!wholeProjects.has(project.id)) {
+        forEachTest(item, (test) => selection.tests.push(test));
+      }
     }
-    return [...roots.values()];
+    return [...selections.values()];
   }
 
   private runProject(
-    project: TestItem,
+    selection: Selection,
     run: TestRun,
     token: CancellationToken,
   ): Promise<void> {
+    const { project, tests } = selection;
     const root = project.id;
     const relativeRoot = this.relativeRoot(root);
-    forEachTest(project, (item) => run.enqueued(item));
-    run.appendOutput(`$ koja test -S ${relativeRoot} --reporter json\r\n`);
+    const args = ["test", "-S", root, "--reporter", "json"];
+    if (tests.length > 0) {
+      tests.forEach((test) => {
+        run.enqueued(test);
+        args.push("--only", test.id);
+      });
+    } else {
+      forEachTest(project, (item) => run.enqueued(item));
+    }
+    const shown = args.map((arg) => (arg === root ? relativeRoot : arg));
+    run.appendOutput(`$ koja ${shown.join(" ")}\r\n`);
 
     return new Promise((resolve) => {
       let child: ChildProcess;
       try {
-        child = spawn(
-          kojaBinary(),
-          ["test", "-S", root, "--reporter", "json"],
-          {
-            cwd: root,
-            env: { ...process.env, NO_COLOR: "1" },
-          },
-        );
+        child = spawn(kojaBinary(), args, {
+          cwd: root,
+          env: { ...process.env, NO_COLOR: "1" },
+        });
       } catch (error) {
         this.failProject(project, run, String(error));
         resolve();
@@ -539,6 +572,22 @@ export class KojaTests {
     }
     return relative(folder.uri.fsPath, root) || ".";
   }
+}
+
+/** The part of one run that targets one project. */
+interface Selection {
+  project: TestItem;
+  /** The selected tests, or empty for the whole project. */
+  tests: TestItem[];
+}
+
+/** The project item at the top of `item`'s ancestry. */
+function projectOf(item: TestItem): TestItem {
+  let top = item;
+  while (top.parent) {
+    top = top.parent;
+  }
+  return top;
 }
 
 /** Calls `visit` on every leaf test under `item`. */
